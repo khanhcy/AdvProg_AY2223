@@ -87,7 +87,7 @@ string chooseWordFromList(const vector<string>& wordList, int index)
 string generateHiddenCharacters(string answerWord){
     // TODO: Based on answerWord's length, generate hidden characters in form of "---"
     string secretWord;
-    for (int i = 0; i < (int)answerWord.size(); i++) {
+    for (int i = 0; i < answerWord.size(); i++) {
         secretWord += '-';
     }
     return secretWord;
@@ -126,7 +126,8 @@ void updateSecretWord(string& secretWord, const char ch, const string& word)
 ***/
 void updateEnteredChars(const char ch, string& chars){
     // TODO: append the character ch is in end of the text chars
-    chars = chars + ch + ' ' ;
+    chars += ch;
+    chars += " ";
 }
 
 /***
@@ -164,11 +165,13 @@ void processData(const char ch, const string& word,
             update incorrectGuess: call updateIncorrectGuess() function
             update incorrectChars: call updateEnteredChars() function
     ***/
-    if (isCharInWord(ch, word)) {
+    if (isCharInWord(ch, word))
+    {
         updateSecretWord(secretWord, ch, word);
         updateEnteredChars(ch, correctChars);
     }
-    else {
+    else
+    {
         updateIncorrectGuess(incorrectGuess);
         updateEnteredChars(ch, incorrectChars);
     }
