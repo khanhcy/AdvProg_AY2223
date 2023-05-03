@@ -1,8 +1,3 @@
-9 lines(222 sloc)  5.79 KB
-
-
-// UPDATE THIS FILE
-
 #include <vector>
 #include <cassert>
 #include <cstdlib>
@@ -16,20 +11,20 @@ using namespace std;
 // set some attributes as default value
 // DO NOT CHANGE THIS CONSTRUCTOR
 Game::Game(int _width, int _height)
-    : width(_width), height(_height), // play screen
-    squares(_height, vector<CellType>(_width, CELL_EMPTY)), // cell coordinates
-    snake(*this, Position(_width / 2, _height / 2)),  // init snake positin in middle of play screen
-    currentDirection(Direction::RIGHT),
-    status(GAME_RUNNING),
-    score(0)
+	: width(_width), height(_height), // play screen 
+	squares(_height, vector<CellType>(_width, CELL_EMPTY)), // cell coordinates
+	snake(*this, Position(_width / 2, _height / 2)),  // init snake positin in middle of play screen
+	currentDirection(Direction::RIGHT),
+	status(GAME_RUNNING),
+	score(0)
 {
-    // add new cheery in game initiation
-    addCherry();
+	// add new cheery in game initiation
+	addCherry();
 }
 
 Game::~Game()
 {
-    //dtor
+	//dtor
 }
 
 
@@ -54,32 +49,21 @@ Game::~Game()
 ***/
 
 void Game::snakeMoveTo(Position pos) {
-    //  START CODE HERE
-    if (squares[pos.y][pos.x] == CELL_OFF_BOARD)
-    {
-        status = GAME_OVER;
-    }
-    else
-    {
-        if (squares[pos.y][pos.x] == CELL_SNAKE) { status = GAME_OVER; }
-        else
-        {
-            if (getCellType(pos) == CELL_CHERRY)
-            {
-                score++;
-                snake.eatCherry();
-                addCherry();
-                setCellType(pos, CELL_SNAKE);
-            }
-        }
-    }
-    //        switch(getCellType(pos)) {
-    //		case CELL_OFF_BOARD:
-    //		case CELL_SNAKE: status = GAME_OVER; break;
-    //		case CELL_CHERRY: score++; snake.eatCherry(); addCherry();
-    //		default: setCellType(pos, CELL_SNAKE);
-    //	}
-        // END CODE HERE
+	switch (getCellType(pos))
+	{
+	case CELL_SNAKE:
+	case CELL_OFF_BOARD:
+		status = GAME_OVER;
+		break;
+	case CELL_CHERRY:
+		++score;
+		snake.eatCherry();
+		addCherry();
+		break;
+	default:
+		snake.slideTo(pos);
+		break;
+	}
 }
 
 
@@ -95,18 +79,14 @@ void Game::snakeMoveTo(Position pos) {
  ***/
 void Game::snakeLeave(Position position)
 {
-    // Suggestion: use setCellType() method in Game class
-    // START CODE HERE
-    setCellType(position, CELL_EMPTY);
-
-    // END CODE HERE
+	setCellType(position, CELL_EMPTY);
 }
 
 
 // DO NOT change this method
 void Game::processUserInput(Direction direction)
 {
-    inputQueue.push(direction);
+	inputQueue.push(direction);
 }
 
 
@@ -125,7 +105,11 @@ void Game::processUserInput(Direction direction)
  *
  ***/
 bool Game::canChange(Direction current, Direction next) const {
-    return (current != UP && next == DOWN) || (current != DOWN && next == UP) || (current != LEFT && next == RIGHT) || (current != RIGHT && next == LEFT);
+	if ((current == UP || current == DOWN) && (next == UP || next == DOWN))
+		return 0;
+	if ((current == LEFT || current == RIGHT) && (next == LEFT || next == RIGHT))
+		return 0;
+	return 1;
 }
 
 
@@ -146,22 +130,22 @@ bool Game::canChange(Direction current, Direction next) const {
 
 void Game::nextStep()
 {
-    while (!inputQueue.empty()) {
-        // get the input direction from input queue
-        Direction next; // YOUR CODE HERE
-        next = inputQueue.front();
-        // remove the front of input queue
-        // YOUR CODE HERE
-        inputQueue.pop();
-        // check if snake can move to the next direction, set current direction as next
-        if (canChange(currentDirection, next)) {
-            // YOUR CODE HERE
-            currentDirection = next;
-            break;
-        }
-    }
+	while (!inputQueue.empty()) {
+		// get the input direction from input queue
+		Direction next;
+		next = inputQueue.front();
 
-    snake.move(currentDirection);
+		// remove the front of input queue
+		inputQueue.pop();
+
+		// check if snake can move to the next direction, set current direction as next
+		if (canChange(currentDirection, next)) {
+			currentDirection = next;
+			break;
+		}
+	}
+
+	snake.move(currentDirection);
 }
 
 
@@ -179,26 +163,23 @@ void Game::nextStep()
 
 void Game::addCherry()
 {
-    do {
-        // init a random position inside the play screen (width, height)
-        // Suggestion: use rand() function
+	do {
+		// init a random position inside the play screen (width, height)
+		// Suggestion: use rand() function
 
-        Position randomPos; // YOUR CODE HERE
-        randomPos.x = rand() % width;
-        randomPos.y = rand() % height;
+		Position randomPos;
+		randomPos = Position(rand() % width, rand() % height);
 
-        // check if the randomPos is EMPTY
-        if (getCellType(randomPos) == CELL_EMPTY) {
+		// check if the randomPos is EMPTY 
+		if (getCellType(randomPos) == CELL_EMPTY) {
 
-            // assign the cherry position as randomPos, and set randomPos type as CELL_CHERRY
+			// assign the cherry position as randomPos, and set randomPos type as CELL_CHERRY
+			cherryPosition = randomPos;
+			setCellType(randomPos, CELL_CHERRY);
 
-            // YOUR CODE HERE
-            // YOUR CODE HERE
-            cherryPosition = randomPos;
-            setCellType(randomPos, CELL_CHERRY);
-            break;
-        }
-    } while (true);
+			break;
+		}
+	} while (true);
 }
 
 
@@ -216,47 +197,44 @@ void Game::addCherry()
  ***/
 void Game::setCellType(Position pos, CellType cellType)
 {
-    // if position is inside the play screen (width, height), set to the cellType.
-    // Otherwise, do nothing
-    // Suggestion: use pos.isInsideBox(...) in Position class
-    //
-    // START CODE HERE
-    if (pos.isInsideBox(0, 0, width, height))
-    {
-        squares[pos.y][pos.x] = cellType;
-    }
-    // END CODE HERE
+	// if position is inside the play screen (width, height), set to the cellType.
+	// Otherwise, do nothing
+	// Suggestion: use pos.isInsideBox(...) in Position class
+	if (pos.isInsideBox(0, 0, width, height)) {
+		squares[pos.y][pos.x] = cellType;
+	}
 }
+
 
 
 // DO NOT change this method
 CellType Game::getCellType(Position pos) const
 {
-    return pos.isInsideBox(0, 0, width, height) ? squares[pos.y][pos.x] : CELL_OFF_BOARD;
+	return pos.isInsideBox(0, 0, width, height) ? squares[pos.y][pos.x] : CELL_OFF_BOARD;
 }
 
 // DO NOT change this method
 vector<Position> Game::getSnakePositions() const
 {
-    return snake.getPositions();
+	return snake.getPositions();
 }
 
 // DO NOT change this method
 GameStatus Game::getGameStatus() {
-    return status;
+	return status;
 }
 
 // DO NOT change this method
 int Game::getWidth() {
-    return width;
+	return width;
 }
 
 // DO NOT change this method
 int Game::getHeight() {
-    return height;
+	return height;
 }
 
 // DO NOT change this method
 Snake Game::getSnake() {
-    return snake;
+	return snake;
 }
